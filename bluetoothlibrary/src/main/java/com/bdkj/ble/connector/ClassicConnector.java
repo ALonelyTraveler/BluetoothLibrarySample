@@ -13,7 +13,7 @@ import java.util.UUID;
  * 传统蓝牙连接器
  * Created by chenwei on 16/5/24.
  */
-public class ClassicConnector {
+public class ClassicConnector extends BluetoothConnector {
 
     /**
      * spp连接的uuid
@@ -28,13 +28,8 @@ public class ClassicConnector {
 
     private boolean isCancel = false;
 
-    private BluetoothDevice device;
-
-    public ClassicConnector(BluetoothDevice device) {
-        this.device = device;
-    }
-
-    public void connect() throws IOException {
+    @Override
+    public void connect(BluetoothDevice device) throws IOException {
         isCancel = false;
         final UUID uuidSPP = UUID.fromString(UUID_SPP);
         if (Build.VERSION.SDK_INT >= 10)// 2.3.3以上的设备需要用这个方式创建通信连接
@@ -44,7 +39,7 @@ public class ClassicConnector {
             // 创建SPP连接 API level 5
             socket = device.createRfcommSocketToServiceRecord(uuidSPP);
         socket.connect();
-        if (isCancel&&socket.isConnected()) {
+        if (isCancel && socket.isConnected()) {
             disconnect();
             return;
         }
@@ -68,8 +63,16 @@ public class ClassicConnector {
         isCancel = true;
     }
 
-    public boolean isCancel() {
-        return isCancel;
+    @Override
+    public void cancelConnect() {
+        isCancel = true;
+        while (socket != null && socket.isConnected()) {
+            try {
+                disconnect();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public InputStream getInputStream() {

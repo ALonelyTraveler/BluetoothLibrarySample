@@ -11,7 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * Created by weimengmeng on 2016/5/19. 检查蓝牙是否可用，是否连接
+ * 蓝牙工具类
  */
 public class BluetoothUtils {
 	/**

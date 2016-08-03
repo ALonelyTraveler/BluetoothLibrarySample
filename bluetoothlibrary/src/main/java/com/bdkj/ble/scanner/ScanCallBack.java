@@ -20,8 +20,7 @@ public interface ScanCallBack {
      * @param name    the name
      * @param address the address
      * @param rssi    the rssi
-     * @param type    the type
      */
     public abstract void foundSpeificDevice(String name, String address,
-                                            int rssi, String type);
+                                            int rssi);
 }

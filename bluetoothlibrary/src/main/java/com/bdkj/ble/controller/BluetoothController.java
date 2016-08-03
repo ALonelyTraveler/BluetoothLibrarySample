@@ -1,34 +1,19 @@
 package com.bdkj.ble.controller;
 
-import android.bluetooth.BluetoothDevice;
-import android.content.Context;
-import android.content.Intent;
-import com.bdkj.ble.link.ConfigInterface;
+import com.bdkj.ble.BluetoothLibrary;
+import com.bdkj.ble.connector.BluetoothConnector;
 import com.bdkj.ble.link.ConnectCallBack;
+import com.bdkj.ble.spp.BluetoothSecretary;
 
 /**
  * 蓝牙控制器
  * Created by chenwei on 16/5/24.
  */
-public abstract class BluetoothController {
-    /**
-     * 最好使用Application.getApplicationContext();
-     */
-    protected Context mContext;
+public abstract class BluetoothController<T extends BluetoothSecretary> extends BluetoothConnector {
     /**
      * 连接断开
      */
-    public static final String CONNECT_INTERRUPT_ACTION = "BluetoothConnector.Connect.Interrupt";
-
-    /**
-     * 接收数据通知
-     */
-    public static final String RECEIVE_DATA_ACTION = "BluetoothConnector.data.receive";
-
-    /**
-     * 接收数据时传递的bundle的key
-     */
-    public static final String EXTRA_DATA = "data";
+    public static final String CONNECT_INTERRUPT_ACTION = BluetoothLibrary.getPackageName() + ".BluetoothConnector.Connect.Interrupt";
 
     /**
      * 初始化状态
@@ -52,18 +37,9 @@ public abstract class BluetoothController {
 
 
     /**
-     * 标记 未断开
-     */
-    public static final int FLAG_BREAK_DEFAULT = -1;
-    /**
-     * 断开标记：正常断开
-     */
-    public static final int FLAG_BREAK_NORMAL = 0;
-
-    /**
      * 连接状态
      */
-    private int connectState = STATE_INIT;
+    protected int connectState = STATE_INIT;
 
     /**
      * The Connect mac.
@@ -76,34 +52,9 @@ public abstract class BluetoothController {
     protected ConnectCallBack mCallBack;
 
     /**
-     * Instantiates a new Bluetooth controller.
-     *
-     * @param mContext the m context
+     * 秘书的引用
      */
-    public BluetoothController(Context mContext) {
-        this.mContext = mContext;
-    }
-
-    /**
-     * 直接连接
-     *
-     * @param device the device
-     */
-    public abstract void connect(BluetoothDevice device);
-
-    /**
-     * Disconnect.
-     */
-    public abstract void disconnect();
-
-    /**
-     * Sets connect mac.
-     *
-     * @param connectMac the connect mac
-     */
-    public void setConnectMac(String connectMac) {
-        this.connectMac = connectMac;
-    }
+    protected T mSecretary;
 
     /**
      * Gets connect mac.
@@ -124,17 +75,8 @@ public abstract class BluetoothController {
     }
 
     /**
-     * Sets connect state.
-     *
-     * @param state the state
-     */
-    public void setConnectState(int state) {
-        this.connectState = state;
-    }
-
-    /**
      * Gets connect state.
-     *
+     * 获取连接状态
      * @return the connect state
      */
     public int getConnectState() {
@@ -160,34 +102,25 @@ public abstract class BluetoothController {
     }
 
     /**
-     * 主要用于ble蓝牙的数据交互
+     * 设置秘书
      *
-     * @param data   the data
-     * @param helper the helper
-     * @return boolean
+     * @param t the t
      */
-    public abstract boolean write(byte[] data, ConfigInterface helper);
-
-    /**
-     * ble模式下取用默认的ConfigInterface
-     *
-     * @param data the data
-     * @return boolean
-     */
-    public abstract boolean write(byte[] data);
-
-    /**
-     * 分发数据
-     *
-     * @param data the data
-     */
-    public void dispatchData(byte[] data) {
-        Intent intent = new Intent();
-        intent.setAction(RECEIVE_DATA_ACTION);
-        intent.putExtra(EXTRA_DATA, data);
-        mContext.sendBroadcast(intent);
+    public void setBluetoothSecretary(T t)
+    {
+        this.mSecretary = t;
     }
 
+    /**
+     * Gets bluetooth secretary.
+     * 获取秘书
+     *
+     * @return the bluetooth secretary
+     */
+    public T getBluetoothSecretary()
+    {
+        return this.mSecretary;
+    }
     /**
      * =====================
      * start --- 超时处理

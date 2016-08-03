@@ -1,21 +1,24 @@
 package com.bdkj.ble.scanner;
 
+import android.annotation.TargetApi;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Context;
+import android.os.Build;
+import android.os.Handler;
+import com.bdkj.ble.scanner.filter.BluetoothFilter;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.Context;
-
-import android.os.Handler;
-import com.bdkj.ble.constants.ScannerType;
-
 /**
- * Created by weimengmeng on 2016/5/13.
+ *  BLE蓝牙搜索器,前提是手机支持低功耗
+ *  支持的API >= 18 (4.3)
  */
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class BLEScanner extends BaseScanner {
     private Context context;
     /**
@@ -83,6 +86,9 @@ public class BLEScanner extends BaseScanner {
         mBT.stopLeScan(mLeScanCallback);
     }
 
+    /**
+     * 搜索到蓝牙设备时回调接口
+     */
     private final BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(final BluetoothDevice device, final int rssi,
@@ -90,25 +96,10 @@ public class BLEScanner extends BaseScanner {
             // 过滤掉不需要的蓝牙设备
             if (device != null && device.getName() != null && scanCallBack != null) {
                 ParsedAd parsedAd = parseData(scanRecord);
-                switch (getFilterType()) {
-                    case FILTER_TYPE_NAME:
-                        if (filterDeviceByName(parsedAd.localName)) {
-                            scanCallBack.foundSpeificDevice(parsedAd.localName,
-                                    device.getAddress(), rssi, ScannerType.BLE);
-                        }
-                        break;
-                    case FILTER_TYPE_ADDRESS:
-                        if (filterDeviceByAddress(device.getAddress())) {
-                            scanCallBack.foundSpeificDevice(parsedAd.localName,
-                                    device.getAddress(), rssi, ScannerType.BLE);
-                        }
-                        break;
-                    case FILTER_TYPE_ALL:
-                        if (filterDeviceByName(parsedAd.localName) || filterDeviceByAddress(device.getAddress())) {
-                            scanCallBack.foundSpeificDevice(parsedAd.localName,
-                                    device.getAddress(), rssi, ScannerType.BLE);
-                        }
-                        break;
+                BluetoothFilter filter = getBluetoothFilter();
+                if (filter != null && filter.filter(device, parsedAd.localName, rssi)) {
+                    scanCallBack.foundSpeificDevice(parsedAd.localName,
+                            device.getAddress(), rssi);
                 }
             }
         }
@@ -116,6 +107,7 @@ public class BLEScanner extends BaseScanner {
 
     /**
      * The type Parsed ad.
+     * 解析canRecord信息类
      */
     public static class ParsedAd {
         /**

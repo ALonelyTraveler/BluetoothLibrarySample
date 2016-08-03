@@ -1,12 +1,19 @@
 package com.bdkj.ble.scanner;
 
-import android.text.TextUtils;
+import com.bdkj.ble.scanner.filter.BluetoothFilter;
+import com.bdkj.ble.scanner.filter.DefaultFilter;
+import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Created by weimengmeng on 2016/5/13.
+ * 基本扫描器
+ * @author: chenwei
+ * @version: V1.0
  */
 public abstract class BaseScanner implements Scanner {
 
@@ -21,48 +28,26 @@ public abstract class BaseScanner implements Scanner {
      * 搜索的超时时间
      */
     protected long timeout = DEFAULT_TIMEOUT;
-    /**
-     * 允许通过的设备名称数组
-     * null允许搜索所有设备
-     */
-    private String[] mNameFilters;
-
-    /**
-     * 允许通过的设备地址数组
-     * null允许搜索所有设备
-     */
-    private String[] mAddressFilters;
 
     /**
      * 搜索过程回调
      */
     protected ScanCallBack scanCallBack;
-    private Timer timer;
-    private ScannerTask mScannerTask;
+
+    /**
+     * RxJava超时处理
+     */
+    private Subscription timeoutSubscriptions;
+
     /**
      * 是否完成搜索
      */
     private boolean isFinish = false;
 
     /**
-     * 按名称过滤
+     * 默认过滤器
      */
-    public final static int FILTER_TYPE_NAME = 0;
-
-    /**
-     * 按地址过滤
-     */
-    public final static int FILTER_TYPE_ADDRESS = 1;
-
-    /**
-     * 按名称和地址过滤(并集)
-     */
-    public final static int FILTER_TYPE_ALL = 2;
-
-    /**
-     * 过滤方式
-     */
-    private int filterType = FILTER_TYPE_NAME;
+    private BluetoothFilter mFilter = new DefaultFilter();
 
     /**
      * 取消搜索
@@ -75,9 +60,18 @@ public abstract class BaseScanner implements Scanner {
      */
     private void startTimer() {
         if (timeout != DEFAULT_TIMEOUT) {
-            mScannerTask = new ScannerTask();
-            timer = new Timer();
-            timer.schedule(mScannerTask, timeout);
+            timeoutSubscriptions = Observable.timer(timeout, TimeUnit.MILLISECONDS)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<Long>() {
+                        @Override
+                        public void call(Long aLong) {
+                            stopScan();
+                            if (scanCallBack != null) {
+                                scanCallBack.finishScan();
+                            }
+                        }
+                    });
         }
     }
 
@@ -101,7 +95,7 @@ public abstract class BaseScanner implements Scanner {
      * 是否正在搜索
      */
     @Override
-    public boolean isScaning() {
+    public boolean isScanning() {
         return !isFinish;
     }
 
@@ -119,96 +113,19 @@ public abstract class BaseScanner implements Scanner {
     public void stopScan() {
         cancelScan();
         isFinish = true;
-        if (mScannerTask != null) {
-            mScannerTask.cancel();
-            mScannerTask = null;
-        }
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
+        if (timeoutSubscriptions != null) {
+            timeoutSubscriptions.unsubscribe();
+            timeoutSubscriptions = null;
         }
     }
 
     @Override
-    public void setNameFilter(String... names) {
-        mNameFilters = names;
+    public void setBluetoothFilter(BluetoothFilter filter) {
+        this.mFilter = filter;
     }
 
     @Override
-    public String[] getNameFilter() {
-        return mNameFilters;
-    }
-
-    class ScannerTask extends TimerTask {
-
-        @Override
-        public void run() {
-            stopScan();
-            if (scanCallBack != null) {
-                scanCallBack.finishScan();
-            }
-        }
-    }
-
-    /**
-     * 按名称过滤设备
-     *
-     * @param name the name
-     * @return boolean
-     */
-    public boolean filterDeviceByName(String name) {
-        if (!TextUtils.isEmpty(name)) {
-            if (mNameFilters == null || mNameFilters.length <= 0 || mNameFilters[0] == null) {
-                return true;
-            }
-            for (String mFilter : mNameFilters) {
-                if (name.startsWith(mFilter)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * 按地址过滤设备
-     *
-     * @param address the address
-     * @return boolean
-     */
-    public boolean filterDeviceByAddress(String address) {
-        if (!TextUtils.isEmpty(address)) {
-            if (mAddressFilters == null || mAddressFilters.length <= 0 || mAddressFilters[0] == null) {
-                return true;
-            }
-            for (String mFilter : mAddressFilters) {
-                if (address.equalsIgnoreCase(mFilter)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-
-    @Override
-    public void setAddressFilter(String... address) {
-        mAddressFilters = address;
-    }
-
-    @Override
-    public String[] getAddressFilter() {
-        return mAddressFilters;
-    }
-
-
-    @Override
-    public void setFilterType(int type) {
-        filterType = type;
-    }
-
-    @Override
-    public int getFilterType() {
-        return filterType;
+    public BluetoothFilter getBluetoothFilter() {
+        return mFilter;
     }
 }

@@ -7,14 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
-import android.util.Log;
-
-import com.bdkj.ble.constants.ScannerType;
+import com.bdkj.ble.scanner.filter.BluetoothFilter;
 
 /**
  * 传统蓝牙搜索器
  * Created by weimengmeng on 2016/5/13.
  */
+@SuppressWarnings("MissingPermission")
 public class ClassicScanner extends BaseScanner {
     private Context context;
     /**
@@ -46,26 +45,11 @@ public class ClassicScanner extends BaseScanner {
             String name = device.getName();
             short rssi = intent.getExtras()
                     .getShort(BluetoothDevice.EXTRA_RSSI);
-            if (device != null && name != null&&scanCallBack!=null) {
-                switch (getFilterType()) {
-                    case FILTER_TYPE_NAME:
-                        if (filterDeviceByName(name)) {
-                            scanCallBack.foundSpeificDevice(name,
-                                    device.getAddress(), rssi, ScannerType.CLASSIC);
-                        }
-                        break;
-                    case FILTER_TYPE_ADDRESS:
-                        if (filterDeviceByAddress(device.getAddress())) {
-                            scanCallBack.foundSpeificDevice(name,
-                                    device.getAddress(), rssi, ScannerType.CLASSIC);
-                        }
-                        break;
-                    case FILTER_TYPE_ALL:
-                        if (filterDeviceByName(name) || filterDeviceByAddress(device.getAddress())) {
-                            scanCallBack.foundSpeificDevice(name,
-                                    device.getAddress(), rssi, ScannerType.CLASSIC);
-                        }
-                        break;
+            if (device != null && name != null && scanCallBack != null) {
+                BluetoothFilter filter = getBluetoothFilter();
+                if (filter != null && filter.filter(device, name, rssi)) {
+                    scanCallBack.foundSpeificDevice(name,
+                            device.getAddress(), rssi);
                 }
             }
         }
@@ -126,7 +110,7 @@ public class ClassicScanner extends BaseScanner {
                 registerFoundReceiver();
                 mBT.startDiscovery();// start scan
             }
-        }, isDiscovering?BLUETOOTH_SCAN_DELAY:0);
+        }, isDiscovering ? BLUETOOTH_SCAN_DELAY : 0);
     }
 
     @Override
@@ -137,6 +121,9 @@ public class ClassicScanner extends BaseScanner {
         unregisterFoundReceiver();
     }
 
+    /**
+     * 注册蓝牙搜索到设备时的通知
+     */
     private void registerFoundReceiver() {
         if (!isFoundListen) {
             IntentFilter foundFilter = new IntentFilter(
@@ -146,6 +133,9 @@ public class ClassicScanner extends BaseScanner {
         }
     }
 
+    /**
+     * 反注册蓝牙搜索到设备时的通知
+     */
     private void unregisterFoundReceiver() {
         if (isFoundListen) {
             context.unregisterReceiver(_foundReceiver);
@@ -153,6 +143,9 @@ public class ClassicScanner extends BaseScanner {
         }
     }
 
+    /**
+     * 注册蓝牙搜索完成通知
+     */
     private void registerFinishReceiver() {
         if (!isListenerFinish) {
             IntentFilter discoveryFilter = new IntentFilter(
@@ -162,6 +155,9 @@ public class ClassicScanner extends BaseScanner {
         }
     }
 
+    /**
+     * 反注册草草搜索完成通知
+     */
     private void unregisterFinishReceiver() {
         if (isListenerFinish) {
             context.unregisterReceiver(_finshedReceiver);

@@ -1,10 +1,12 @@
 package com.bdkj.ble.constants;
 
+import com.bdkj.ble.BluetoothLibrary;
+
 /**
  * Created by weimegnmegn on 2016/5/14.
  */
 public class ConstansValue {
-	private static String ACTION = "com.ble.action";
+	private static String ACTION = BluetoothLibrary.getPackageName();
 	/**
 	 * 找到蓝牙设备
 	 */

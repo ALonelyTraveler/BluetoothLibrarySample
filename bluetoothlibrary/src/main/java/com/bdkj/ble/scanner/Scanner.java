@@ -1,7 +1,12 @@
 package com.bdkj.ble.scanner;
 
+import com.bdkj.ble.scanner.filter.BluetoothFilter;
+
 /**
- * Created by weimengmeng on 2016/5/13.
+ * 扫描器的基类
+ *
+ * @author: chenwei
+ * @version: V1.0
  */
 public interface Scanner {
     /**
@@ -28,52 +33,26 @@ public interface Scanner {
      */
     public abstract void stopScan();
 
-    /**
-     * 设置筛选条件
-     *
-     * @param names the names
-     */
-    public abstract void setNameFilter(String... names);
-
-    /**
-     * Sets address filter.
-     *
-     * @param address the address
-     */
-    public abstract void setAddressFilter(String... address);
-
-    /**
-     * Get name filter string [ ].
-     *
-     * @return the string [ ]
-     */
-    public abstract String[] getNameFilter();
-
-    /**
-     * Get address filter string [ ].
-     *
-     * @return the string [ ]
-     */
-    public abstract String[] getAddressFilter();
 
     /**
      * 是否正在搜索
      *
-     * @return boolean
+     * @return boolean boolean
      */
-    public abstract boolean isScaning();
+    public abstract boolean isScanning();
 
     /**
-     * 设置过滤类型
+     * Sets bluetooth filter.
      *
-     * @param type 取值{@link BaseScanner#FILTER_TYPE_NAME}             {@link BaseScanner#FILTER_TYPE_ADDRESS}             {@link BaseScanner#FILTER_TYPE_ALL}
+     * @param filter the filter
      */
-    public abstract void setFilterType(int type);
+    public abstract void setBluetoothFilter(BluetoothFilter filter);
 
     /**
-     * Gets filter type.
+     * Gets bluetooth filter.
      *
-     * @return the filter type
+     * @return the bluetooth filter
      */
-    public abstract int getFilterType();
+    public abstract BluetoothFilter getBluetoothFilter();
+
 }
