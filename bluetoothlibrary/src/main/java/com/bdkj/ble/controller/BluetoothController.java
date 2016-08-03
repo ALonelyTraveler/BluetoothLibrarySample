@@ -65,10 +65,21 @@ public abstract class BluetoothController {
      */
     private int connectState = STATE_INIT;
 
+    /**
+     * The Connect mac.
+     */
     protected String connectMac;
 
+    /**
+     * The M call back.
+     */
     protected ConnectCallBack mCallBack;
 
+    /**
+     * Instantiates a new Bluetooth controller.
+     *
+     * @param mContext the m context
+     */
     public BluetoothController(Context mContext) {
         this.mContext = mContext;
     }
@@ -76,36 +87,74 @@ public abstract class BluetoothController {
     /**
      * 直接连接
      *
-     * @param device
+     * @param device the device
      */
     public abstract void connect(BluetoothDevice device);
 
+    /**
+     * Disconnect.
+     */
     public abstract void disconnect();
 
+    /**
+     * Sets connect mac.
+     *
+     * @param connectMac the connect mac
+     */
     public void setConnectMac(String connectMac) {
         this.connectMac = connectMac;
     }
 
+    /**
+     * Gets connect mac.
+     *
+     * @return the connect mac
+     */
     public String getConnectMac() {
         return connectMac;
     }
 
+    /**
+     * Is connect boolean.
+     *
+     * @return the boolean
+     */
     public boolean isConnect() {
         return connectState == STATE_CONNECTED;
     }
 
+    /**
+     * Sets connect state.
+     *
+     * @param state the state
+     */
     public void setConnectState(int state) {
         this.connectState = state;
     }
 
+    /**
+     * Gets connect state.
+     *
+     * @return the connect state
+     */
     public int getConnectState() {
         return connectState;
     }
 
+    /**
+     * Gets call back.
+     *
+     * @return the call back
+     */
     public ConnectCallBack getCallBack() {
         return mCallBack;
     }
 
+    /**
+     * Sets call back.
+     *
+     * @param mCallBack the m call back
+     */
     public void setCallBack(ConnectCallBack mCallBack) {
         this.mCallBack = mCallBack;
     }
@@ -113,24 +162,24 @@ public abstract class BluetoothController {
     /**
      * 主要用于ble蓝牙的数据交互
      *
-     * @param data
-     * @param helper
-     * @return
+     * @param data   the data
+     * @param helper the helper
+     * @return boolean
      */
     public abstract boolean write(byte[] data, ConfigInterface helper);
 
     /**
      * ble模式下取用默认的ConfigInterface
      *
-     * @param data
-     * @return
+     * @param data the data
+     * @return boolean
      */
     public abstract boolean write(byte[] data);
 
     /**
      * 分发数据
      *
-     * @param data
+     * @param data the data
      */
     public void dispatchData(byte[] data) {
         Intent intent = new Intent();
@@ -154,14 +203,27 @@ public abstract class BluetoothController {
      */
     protected long timeout = DEFAULT_TIMEOUT;
 
+    /**
+     * Sets timeout.
+     *
+     * @param timeout the timeout
+     */
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
 
+    /**
+     * Gets timeout.
+     *
+     * @return the timeout
+     */
     public long getTimeout() {
         return timeout;
     }
 
+    /**
+     * Cancel timeout.
+     */
     public abstract void cancelTimeout();
 
     /**

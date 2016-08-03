@@ -8,14 +8,14 @@ public interface ClassicReadCallBack {
     /**
      * 数据接收
      *
-     * @param data
+     * @param data the data
      */
     public void dataReceive(byte[] data);
 
     /**
      * 读取时中断
      *
-     * @param isCancel
+     * @param isCancel the is cancel
      */
     public void readBreak(boolean isCancel);
 }

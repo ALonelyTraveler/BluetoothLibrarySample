@@ -6,8 +6,6 @@ import java.util.Locale;
  * 16进制值与String/Byte之间的转换
  *
  * @author JerryLi
- * @email lijian@dzs.mobi
- * @data 2011-10-16
  */
 public class CHexConver {
     private final static char[] mChars = "0123456789ABCDEF".toCharArray();
@@ -17,7 +15,7 @@ public class CHexConver {
      * 检查16进制字符串是否有效
      *
      * @param sHex String 16进制字符串
-     * @return boolean
+     * @return boolean boolean
      */
     public static boolean checkHexStr(String sHex) {
         String sTmp = sHex.toString().trim().replace(" ", "").toUpperCase(Locale.US);
@@ -86,6 +84,12 @@ public class CHexConver {
         return sb.toString().trim().toUpperCase(Locale.US);
     }
 
+    /**
+     * Byte 2 hex str string.
+     *
+     * @param b the b
+     * @return the string
+     */
     public static String byte2HexStr(byte b) {
         StringBuilder sb = new StringBuilder();
 
@@ -99,7 +103,7 @@ public class CHexConver {
      * bytes字符串转换为Byte值
      *
      * @param src String Byte字符串，每个Byte之间没有分隔符(字符范围:0-9 A-F)
-     * @return byte[]
+     * @return byte[] byte [ ]
      */
     public static byte[] hexStr2Bytes(String src) {
         /*对输入值进行规范化整理*/
@@ -122,7 +126,7 @@ public class CHexConver {
      *
      * @param strText String 全角字符串
      * @return String 每个unicode之间无分隔符
-     * @throws Exception
+     * @throws Exception the exception
      */
     public static String strToUnicode(String strText)
             throws Exception {

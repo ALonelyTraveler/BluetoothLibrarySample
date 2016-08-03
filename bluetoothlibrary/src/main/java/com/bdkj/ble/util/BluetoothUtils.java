@@ -21,6 +21,8 @@ public class BluetoothUtils {
 
 	/**
 	 * 蓝牙是否支持
+	 *
+	 * @return the boolean
 	 */
 	public static boolean isSupportBT() {
 		return bt != null;
@@ -28,8 +30,8 @@ public class BluetoothUtils {
 
 	/**
 	 * 蓝牙是否启动
-	 * 
-	 * @return
+	 *
+	 * @return boolean
 	 */
 	public static boolean isEnableBT() {
 		return bt!=null&&bt.isEnabled();
@@ -40,7 +42,7 @@ public class BluetoothUtils {
 	 * 是否支持BLE蓝牙
 	 *
 	 * @param context the context
-	 * @return boolean
+	 * @return boolean boolean
 	 */
 	public static boolean supportBLE(Context context) {
 		if (!isSupportBT()) {
@@ -51,6 +53,9 @@ public class BluetoothUtils {
 
 	/**
 	 * 启动蓝牙(等待用户确认)
+	 *
+	 * @param context     the context
+	 * @param requestCode the request code
 	 */
 	public static void requestEnableBluetooth(Context context, int requestCode) {
 		Intent mIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -59,6 +64,8 @@ public class BluetoothUtils {
 
 	/**
 	 * 自动启动蓝牙
+	 *
+	 * @return the boolean
 	 */
 	@SuppressWarnings("MissingPermission")
 	public static boolean autoEnableBluetooth() {
@@ -67,6 +74,8 @@ public class BluetoothUtils {
 
 	/**
 	 * 关闭蓝牙
+	 *
+	 * @return the boolean
 	 */
 	@SuppressWarnings("MissingPermission")
 	public static boolean closeBluetooth() {
@@ -76,8 +85,8 @@ public class BluetoothUtils {
 	/**
 	 * 主动配对设备
 	 *
-	 * @param device
-	 * @return
+	 * @param device the device
+	 * @return boolean
 	 */
 	public static boolean pairDevice(BluetoothDevice device) {
 		boolean success = false;
@@ -98,9 +107,10 @@ public class BluetoothUtils {
 
 	/**
 	 * 取消配对
-	 * @param btDevice
-	 * @return
-	 * @throws Exception
+	 *
+	 * @param btDevice the bt device
+	 * @return boolean
+	 * @throws Exception the exception
 	 */
 	public static boolean removeBond(BluetoothDevice btDevice) throws Exception {
 		if (btDevice == null) {
@@ -113,9 +123,10 @@ public class BluetoothUtils {
 
 	/**
 	 * 获取设备配对状态
-	 * @param device
-	 * @return
-     */
+	 *
+	 * @param device the device
+	 * @return pair status
+	 */
 	public static int getPairStatus(BluetoothDevice device) {
 		return device.getBondState();
 	}

@@ -1,11 +1,11 @@
 package com.bdkj.ble;
 
 /**
- * @ClassName: BluetoothLibrary
- * @Description: 为库提供必要的工程信息
+ * The type Bluetooth library.
+ *
+ * 为库提供必要的工程信息
  * @author: chenwei
  * @version: V1.0
- * @Date: 16/8/3 上午10:59
  */
 public class BluetoothLibrary {
 

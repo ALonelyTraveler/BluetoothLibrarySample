@@ -35,11 +35,22 @@ public class BLEScanner extends BaseScanner {
 
     }
 
+    /**
+     * Instantiates a new Ble scanner.
+     *
+     * @param context the context
+     * @param timeout the timeout
+     */
     public BLEScanner(Context context, long timeout) {
         super(timeout);
         this.context = context;
     }
 
+    /**
+     * Instantiates a new Ble scanner.
+     *
+     * @param context the context
+     */
     public BLEScanner(Context context) {
         super(DEFAULT_TIMEOUT);
         this.context = context;
@@ -103,10 +114,25 @@ public class BLEScanner extends BaseScanner {
         }
     };
 
+    /**
+     * The type Parsed ad.
+     */
     public static class ParsedAd {
+        /**
+         * The Flags.
+         */
         public int flags;
+        /**
+         * The Uuids.
+         */
         public List<UUID> uuids = new ArrayList<UUID>();
+        /**
+         * The Local name.
+         */
         public String localName;
+        /**
+         * The Manufacturer.
+         */
         public short manufacturer;
     }
 
@@ -114,8 +140,8 @@ public class BLEScanner extends BaseScanner {
      * 通过对ble广播的byte数据进行解释获取localName等信息
      * 参考网址：http://www.tuicool.com/articles/3EZjYvv
      *
-     * @param adv_data
-     * @return
+     * @param adv_data the adv data
+     * @return parsed ad
      */
     public static ParsedAd parseData(byte[] adv_data) {
         ParsedAd parsedAd = new ParsedAd();

@@ -9,6 +9,7 @@ buildscript {
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+        classpath 'com.novoda:bintray-release:0.3.4'
     }
 }
 
@@ -20,4 +21,18 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+def libraryVersion = "0.1.1"
+
+ext {
+//-------- bintray config -----------
+    userOrg = "chen455687686"//bintray.com用户名
+    groupId = "com.bandou"//jcenter上的路径
+    publishVersion = libraryVersion//版本号
+    desc = "This is a bluetooth library"//类库的描述，不重要
+    website = "https://github.com/ALonelyTraveler/BluetoothLibrarySample"//类库的网站，不重要
+    uploadName = "BluetoothLibrary" //上传在bintray的文件夹
+    licences = ["Apache-2.0"]
+// --------bintray config-----
 }

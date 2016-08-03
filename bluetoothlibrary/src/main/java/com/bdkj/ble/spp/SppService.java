@@ -25,22 +25,39 @@ public class SppService {
 	 */
 	public final int CACHE_SIZE = 1024 * 2;
 
+	/**
+	 * The Socket.
+	 */
 	public BluetoothSocket socket;
 
+	/**
+	 * The Input stream.
+	 */
 	public InputStream inputStream;
 
+	/**
+	 * The Output stream.
+	 */
 	public OutputStream outputStream;
 
+	/**
+	 * The Device.
+	 */
 	public BluetoothDevice device;
 
+	/**
+	 * Instantiates a new Spp service.
+	 *
+	 * @param device the device
+	 */
 	public SppService(BluetoothDevice device) {
 		this.device = device;
 	}
 
 	/**
 	 * 建立连接
-	 * 
-	 * @return
+	 *
+	 * @return boolean
 	 */
 	public boolean createConnect() {
 		final UUID uuidSPP = UUID.fromString(UUID_SPP);
@@ -93,9 +110,9 @@ public class SppService {
 
 	/**
 	 * 读数据
-	 * 
-	 * @return
-	 * @throws IOException
+	 *
+	 * @return byte [ ]
+	 * @throws IOException the io exception
 	 */
 	public byte[] read() throws IOException {
 		if (inputStream != null && socket != null && socket.isConnected()) {
@@ -115,9 +132,10 @@ public class SppService {
 
 	/**
 	 * 向流中写入数据
-	 * 
-	 * @param data
-	 * @return
+	 *
+	 * @param data the data
+	 * @return boolean
+	 * @throws IOException the io exception
 	 */
 	public boolean write(byte[] data) throws IOException {
 		boolean success = false;
@@ -128,38 +146,83 @@ public class SppService {
 		return success;
 	}
 
+	/**
+	 * Gets input stream.
+	 *
+	 * @return the input stream
+	 */
 	public InputStream getInputStream() {
 		return inputStream;
 	}
 
+	/**
+	 * Sets input stream.
+	 *
+	 * @param inputStream the input stream
+	 */
 	public void setInputStream(InputStream inputStream) {
 		this.inputStream = inputStream;
 	}
 
+	/**
+	 * Gets output stream.
+	 *
+	 * @return the output stream
+	 */
 	public OutputStream getOutputStream() {
 		return outputStream;
 	}
 
+	/**
+	 * Sets output stream.
+	 *
+	 * @param outputStream the output stream
+	 */
 	public void setOutputStream(OutputStream outputStream) {
 		this.outputStream = outputStream;
 	}
 
+	/**
+	 * Gets device.
+	 *
+	 * @return the device
+	 */
 	public BluetoothDevice getDevice() {
 		return device;
 	}
 
+	/**
+	 * Sets device.
+	 *
+	 * @param device the device
+	 */
 	public void setDevice(BluetoothDevice device) {
 		this.device = device;
 	}
 
+	/**
+	 * Gets socket.
+	 *
+	 * @return the socket
+	 */
 	public BluetoothSocket getSocket() {
 		return socket;
 	}
 
+	/**
+	 * Sets socket.
+	 *
+	 * @param socket the socket
+	 */
 	public void setSocket(BluetoothSocket socket) {
 		this.socket = socket;
 	}
 
+	/**
+	 * Gets device mac.
+	 *
+	 * @return the device mac
+	 */
 	public String getDeviceMac() {
 		if (device != null) {
 			return device.getAddress();

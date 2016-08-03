@@ -84,44 +84,103 @@ public abstract class BluetoothConnector {
      */
     private String connectMac = null;
 
+    /**
+     * The M call back.
+     */
     protected ConnectCallBack mCallBack;
 
+    /**
+     * Connect.
+     *
+     * @param device the device
+     * @throws IOException the io exception
+     */
     public abstract void connect(BluetoothDevice device) throws IOException;
 
+    /**
+     * Disconnect.
+     *
+     * @throws IOException the io exception
+     */
     public abstract void disconnect() throws IOException;
 
+    /**
+     * Sets connect mac.
+     *
+     * @param connectMac the connect mac
+     */
     public void setConnectMac(String connectMac) {
         this.connectMac = connectMac;
     }
 
+    /**
+     * Gets connect mac.
+     *
+     * @return the connect mac
+     */
     public String getConnectMac() {
         return connectMac;
     }
 
+    /**
+     * Is connect boolean.
+     *
+     * @return the boolean
+     */
     public boolean isConnect() {
         return connectState == STATE_CONNECTED;
     }
 
+    /**
+     * Sets connect state.
+     *
+     * @param state the state
+     */
     public void setConnectState(int state) {
         this.connectState = state;
     }
 
+    /**
+     * Gets connect state.
+     *
+     * @return the connect state
+     */
     public int getConnectState() {
         return connectState;
     }
 
+    /**
+     * Sets break flag.
+     *
+     * @param breakFlag the break flag
+     */
     public void setBreakFlag(int breakFlag) {
         this.breakFlag = breakFlag;
     }
 
+    /**
+     * Gets break flag.
+     *
+     * @return the break flag
+     */
     public int getBreakFlag() {
         return breakFlag;
     }
 
+    /**
+     * Gets call back.
+     *
+     * @return the call back
+     */
     public ConnectCallBack getCallBack() {
         return mCallBack;
     }
 
+    /**
+     * Sets call back.
+     *
+     * @param mCallBack the m call back
+     */
     public void setCallBack(ConnectCallBack mCallBack) {
         this.mCallBack = mCallBack;
     }

@@ -17,10 +17,10 @@ public interface ScanCallBack {
     /**
      * 找到设备后回掉
      *
-     * @param name
-     * @param address
-     * @param rssi
-     * @param type
+     * @param name    the name
+     * @param address the address
+     * @param rssi    the rssi
+     * @param type    the type
      */
     public abstract void foundSpeificDevice(String name, String address,
                                             int rssi, String type);

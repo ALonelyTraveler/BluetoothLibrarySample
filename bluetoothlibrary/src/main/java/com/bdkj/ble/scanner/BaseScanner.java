@@ -1,9 +1,9 @@
 package com.bdkj.ble.scanner;
 
+import android.text.TextUtils;
+
 import java.util.Timer;
 import java.util.TimerTask;
-
-import android.text.TextUtils;
 
 /**
  * Created by weimengmeng on 2016/5/13.
@@ -153,8 +153,8 @@ public abstract class BaseScanner implements Scanner {
     /**
      * 按名称过滤设备
      *
-     * @param name
-     * @return
+     * @param name the name
+     * @return boolean
      */
     public boolean filterDeviceByName(String name) {
         if (!TextUtils.isEmpty(name)) {
@@ -173,8 +173,8 @@ public abstract class BaseScanner implements Scanner {
     /**
      * 按地址过滤设备
      *
-     * @param address
-     * @return
+     * @param address the address
+     * @return boolean
      */
     public boolean filterDeviceByAddress(String address) {
         if (!TextUtils.isEmpty(address)) {
