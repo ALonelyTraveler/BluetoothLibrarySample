@@ -7,6 +7,12 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import com.bdkj.ble.scanner.filter.BluetoothFilter;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -93,14 +99,32 @@ public class BLEScanner extends BaseScanner {
         @Override
         public void onLeScan(final BluetoothDevice device, final int rssi,
                              final byte[] scanRecord) {
-            // 过滤掉不需要的蓝牙设备
-            if (device != null && device.getName() != null && scanCallBack != null) {
-                ParsedAd parsedAd = parseData(scanRecord);
-                BluetoothFilter filter = getBluetoothFilter();
-                if (filter != null && filter.filter(device, parsedAd.localName, rssi)) {
-                    scanCallBack.foundSpeificDevice(parsedAd.localName,
-                            device.getAddress(), rssi);
-                }
+            //在该方法中尽量少做事情
+            if (scanCallBack != null && device != null) {
+                //过滤并将线程切换到主线程
+                Observable.create(new Observable.OnSubscribe<ParsedAd>()
+                {
+                    @Override
+                    public void call(Subscriber<? super ParsedAd> subscriber) {
+                        ParsedAd result = parseData(scanRecord);
+                        subscriber.onNext(result);
+                        subscriber.onCompleted();
+                    }
+                }).filter(new Func1<ParsedAd, Boolean>() {
+                    @Override
+                    public Boolean call(ParsedAd parsedAd) {
+                        BluetoothFilter filter = getBluetoothFilter();
+                        return filter == null || filter.filter(device, parsedAd.localName, rssi);
+                    }
+                }).subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<ParsedAd>() {
+                            @Override
+                            public void call(ParsedAd parsedAd) {
+                                scanCallBack.foundSpeificDevice(parsedAd.localName,
+                                        device.getAddress(), rssi);
+                            }
+                        });
             }
         }
     };

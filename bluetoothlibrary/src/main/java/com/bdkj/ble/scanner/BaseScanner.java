@@ -1,5 +1,6 @@
 package com.bdkj.ble.scanner;
 
+import android.util.Log;
 import com.bdkj.ble.scanner.filter.BluetoothFilter;
 import com.bdkj.ble.scanner.filter.DefaultFilter;
 import rx.Observable;
@@ -60,6 +61,7 @@ public abstract class BaseScanner implements Scanner {
      */
     private void startTimer() {
         if (timeout != DEFAULT_TIMEOUT) {
+            Log.d("BaseScanner", "startTimer()--timeout:" + timeout);
             timeoutSubscriptions = Observable.timer(timeout, TimeUnit.MILLISECONDS)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())

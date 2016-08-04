@@ -57,6 +57,11 @@ public abstract class BluetoothController<T extends BluetoothSecretary> extends 
     protected T mSecretary;
 
     /**
+     * 是否自动重连
+     */
+    protected boolean reconnect;
+
+    /**
      * Gets connect mac.
      *
      * @return the connect mac
@@ -99,6 +104,22 @@ public abstract class BluetoothController<T extends BluetoothSecretary> extends 
      */
     public void setCallBack(ConnectCallBack mCallBack) {
         this.mCallBack = mCallBack;
+    }
+
+    /**
+     * 设置是否重连
+     * @param reconnect
+     */
+    public void setReconnect(boolean reconnect) {
+        this.reconnect = reconnect;
+    }
+
+    /**
+     * 是否重连
+     * @return
+     */
+    public boolean isReconnect() {
+        return reconnect;
     }
 
     /**

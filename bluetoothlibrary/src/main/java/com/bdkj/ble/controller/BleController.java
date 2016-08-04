@@ -8,11 +8,8 @@ import android.os.Build;
 import android.util.Log;
 import com.bdkj.ble.BuildConfig;
 import com.bdkj.ble.connector.BleConnector;
-import com.bdkj.ble.connector.ClassicConnector;
 import com.bdkj.ble.link.BLEConnectCallBack;
-import com.bdkj.ble.link.ConfigInterface;
 import com.bdkj.ble.spp.BleSecretary;
-import com.bdkj.ble.spp.ClassicSecretary;
 import com.bdkj.ble.util.CHexConver;
 import rx.Observable;
 import rx.Subscription;
@@ -22,7 +19,6 @@ import rx.schedulers.Schedulers;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,47 +38,53 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
-            if (BluetoothGatt.STATE_CONNECTED == newState) {
-                cancelTimeout();
-                if (connectState == STATE_CONNECTING) {
-                    if (mCallBack != null) {
-                        mCallBack.connectSuccess();
-                    }
-                    connectState = STATE_CONNECTED;
-                }
-                else{
-                    disconnect();
-                    return;
-                }
-                // 进行服务发现，50ms
-                try {
-                    Thread.sleep(50);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                gatt.discoverServices();
-            } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
-                cancelTimeout();
-                if (status == BluetoothGatt.STATE_CONNECTING) {
-                    //与蓝牙设备连接时断开，表示连接时并没有成功
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                if (BluetoothGatt.STATE_CONNECTED == newState) {
+                    cancelTimeout();
                     if (connectState == STATE_CONNECTING) {
                         if (mCallBack != null) {
-                            mCallBack.connectFail();
+                            mCallBack.connectSuccess();
+                        }
+                        connectState = STATE_CONNECTED;
+                    }
+                    else{
+                        disconnect();
+                        return;
+                    }
+                    // 进行服务发现，50ms
+                    try {
+                        Thread.sleep(50);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    gatt.discoverServices();
+                } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
+                    cancelTimeout();
+                    if (status == BluetoothGatt.STATE_CONNECTING) {
+                        //与蓝牙设备连接时断开，表示连接时并没有成功
+                        if (connectState == STATE_CONNECTING) {
+                            if (mCallBack != null) {
+                                mCallBack.connectFail();
+                            }
+                        }
+                        connectState = STATE_INIT;
+                    } else if (status == BluetoothGatt.STATE_CONNECTED || status == BluetoothGatt.STATE_DISCONNECTING) {
+                        //用户手动断开或设备主动断开的情况下标记Flag并发送断开的通知
+                        connectState = STATE_INIT;
+                        if (mContext != null) {
+                            Intent intent = new Intent(CONNECT_INTERRUPT_ACTION);
+                            mContext.sendBroadcast(intent);
                         }
                     }
-                    connectState = STATE_INIT;
-                } else if (status == BluetoothGatt.STATE_CONNECTED || status == BluetoothGatt.STATE_DISCONNECTING) {
-                    //用户手动断开或设备主动断开的情况下标记Flag并发送断开的通知
-                    connectState = STATE_INIT;
-                    if (mContext != null) {
-                        Intent intent = new Intent(CONNECT_INTERRUPT_ACTION);
-                        mContext.sendBroadcast(intent);
+                    if (mConnector!= null) {
+                        mConnector.closeGatt();
                     }
                 }
-                if (mConnector.getBluetoothGatt() != null) {
-                    mConnector.closeGatt();
-                }
             }
+            else{
+                
+            }
+
         }
 
         @Override
@@ -123,7 +125,7 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
             if (mContext != null) {
-                dispatchData(characteristic.getValue());
+//                dispatchData(characteristic.getValue());
             }
         }
 
@@ -148,7 +150,7 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
         }
         connectMac = device.getAddress();
         connectState = STATE_CONNECTING;
-        isTimeout = false;
+//        isTimeout = false;
         try {
             mConnector.connect(device.getAddress());
             timeoutSubscription = Observable.timer(timeout,TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
@@ -157,7 +159,7 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
                         @Override
                         public void call(Long aLong) {
                             cancelConnect();
-                            isTimeout = true;
+//                            isTimeout = true;
                             if (mCallBack != null) {
                                 mCallBack.connectFail();
                             }
@@ -201,13 +203,13 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
 
     public void setCharacteristicNotification(
             BluetoothGattCharacteristic characteristic, boolean enabled) {
-        bluetoothGatt.setCharacteristicNotification(characteristic, enabled);
-        List<BluetoothGattDescriptor> descriptors = characteristic
-                .getDescriptors();
-        for (BluetoothGattDescriptor dp : descriptors) {
-            dp.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            bluetoothGatt.writeDescriptor(dp);
-        }
+//        bluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+//        List<BluetoothGattDescriptor> descriptors = characteristic
+//                .getDescriptors();
+//        for (BluetoothGattDescriptor dp : descriptors) {
+//            dp.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+//            bluetoothGatt.writeDescriptor(dp);
+//        }
     }
 
 }

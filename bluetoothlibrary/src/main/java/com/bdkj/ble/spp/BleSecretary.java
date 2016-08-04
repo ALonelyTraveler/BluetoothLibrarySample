@@ -1,5 +1,7 @@
 package com.bdkj.ble.spp;
 
+import com.bdkj.ble.connector.BluetoothConnector;
+
 /**
  * @ClassName: BleSecretary
  * @Description: 低功耗蓝牙秘书
@@ -8,9 +10,11 @@ package com.bdkj.ble.spp;
  * @Date: 16/8/3 下午4:21
  */
 public class BleSecretary implements BluetoothSecretary {
-    @Override
-    public void employ() {
+    private BluetoothConnector mConnector;
 
+    @Override
+    public void employ(BluetoothConnector mConnector) {
+        this.mConnector = mConnector;
     }
 
     @Override

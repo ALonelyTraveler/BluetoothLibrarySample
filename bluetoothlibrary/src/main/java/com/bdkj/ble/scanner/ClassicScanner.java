@@ -8,6 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import com.bdkj.ble.scanner.filter.BluetoothFilter;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * 传统蓝牙搜索器
@@ -39,18 +45,35 @@ public class ClassicScanner extends BaseScanner {
         public void onReceive(Context context, Intent intent) {
             /* get the search results */
             // ToastUtils.show("设备名称:----");
-            BluetoothDevice device = intent
+            final BluetoothDevice device = intent
                     .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             // 过滤掉不需要的蓝牙设备
-            String name = device.getName();
-            short rssi = intent.getExtras()
+            final String name = device.getName();
+            final short rssi = intent.getExtras()
                     .getShort(BluetoothDevice.EXTRA_RSSI);
             if (device != null && name != null && scanCallBack != null) {
-                BluetoothFilter filter = getBluetoothFilter();
-                if (filter != null && filter.filter(device, name, rssi)) {
-                    scanCallBack.foundSpeificDevice(name,
-                            device.getAddress(), rssi);
-                }
+                Observable.create(new Observable.OnSubscribe<String>() {
+                    @Override
+                    public void call(Subscriber<? super String> subscriber) {
+                        subscriber.onNext(name);
+                        subscriber.onCompleted();
+                    }
+                }).filter(new Func1<String, Boolean>() {
+                    @Override
+                    public Boolean call(String name) {
+                        BluetoothFilter filter = getBluetoothFilter();
+                        return filter == null || filter.filter(device, name, rssi);
+                    }
+                }).subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<String>() {
+                            @Override
+                            public void call(String name) {
+                                scanCallBack.foundSpeificDevice(name,
+                                        device.getAddress(), rssi);
+                            }
+                        });
+
             }
         }
     };

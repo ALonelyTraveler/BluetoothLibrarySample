@@ -30,6 +30,7 @@ public class BleConnector extends BluetoothConnector {
     @Override
     public void connect(BluetoothDevice device) {
         if (mBluetoothGatt != null) {
+            mBluetoothGatt.disconnect();
             mBluetoothGatt.close();
         }
         mBluetoothGatt = device.connectGatt(mContext.getApplicationContext(), false, mGattCallback);
@@ -39,7 +40,6 @@ public class BleConnector extends BluetoothConnector {
     public void disconnect() {
         if (mBluetoothGatt != null) {
             mBluetoothGatt.disconnect();
-            mBluetoothGatt = null;
         }
     }
 
@@ -49,7 +49,6 @@ public class BleConnector extends BluetoothConnector {
         if (mBluetoothGatt != null) {
             mBluetoothGatt.disconnect();
             mBluetoothGatt.close();
-            mBluetoothGatt = null;
         }
     }
 
@@ -62,7 +61,6 @@ public class BleConnector extends BluetoothConnector {
     {
         if (mBluetoothGatt != null) {
             mBluetoothGatt.close();
-            mBluetoothGatt = null;
         }
     }
 
