@@ -71,18 +71,12 @@ public class ClassicController<T extends ClassicSecretary> extends BluetoothCont
                         }
                         e.printStackTrace();
                         connectState = STATE_INIT;
-                        if (mCallBack != null) {
-                            mCallBack.connectFail();
-                        }
                     }
 
                     @Override
                     public void onNext(Boolean aBoolean) {
                         cancelTimeout();
                         connectState = STATE_CONNECTED;
-                        if (mCallBack != null) {
-                            mCallBack.connectSuccess();
-                        }
                         if (mSecretary != null) {
                             mSecretary.dismiss();
                         }
@@ -98,9 +92,6 @@ public class ClassicController<T extends ClassicSecretary> extends BluetoothCont
                     @Override
                     public void call(Long aLong) {
                         cancelConnect();
-                        if (mCallBack != null) {
-                            mCallBack.connectFail();
-                        }
                     }
                 });
 

@@ -9,19 +9,39 @@ package com.bdkj.ble;
  */
 public class BluetoothLibrary {
 
+    private static BluetoothLibrary mLibrary = new BluetoothLibrary();
     /**
      * The constant sPackageName.
      */
     public static String sPackageName = "";
 
     /**
+     * The constant debug.
+     */
+    public static boolean debug = false;
+
+    /**
      * Init package.
      * 初始化包名
      *
      * @param packageName the package name
+     * @return the bluetooth library
      */
-    public void initPackage(String packageName) {
-        this.sPackageName = packageName;
+    public static BluetoothLibrary initPackage(String packageName) {
+        mLibrary.sPackageName = packageName;
+        return mLibrary;
+    }
+
+    /**
+     * Sets debug.
+     *
+     * @param debug the debug
+     * @return the debug
+     */
+    public static BluetoothLibrary setDebug(boolean debug)
+    {
+        mLibrary.debug = debug;
+        return mLibrary;
     }
 
     /**
@@ -32,5 +52,14 @@ public class BluetoothLibrary {
      */
     public static String getPackageName() {
         return sPackageName;
+    }
+
+    /**
+     * Is debug boolean.
+     *
+     * @return the boolean
+     */
+    public static boolean isDebug() {
+        return debug;
     }
 }

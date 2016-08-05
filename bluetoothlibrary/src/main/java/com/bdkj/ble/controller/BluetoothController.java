@@ -1,8 +1,6 @@
 package com.bdkj.ble.controller;
 
-import com.bdkj.ble.BluetoothLibrary;
 import com.bdkj.ble.connector.BluetoothConnector;
-import com.bdkj.ble.link.ConnectCallBack;
 import com.bdkj.ble.spp.BluetoothSecretary;
 
 /**
@@ -10,10 +8,6 @@ import com.bdkj.ble.spp.BluetoothSecretary;
  * Created by chenwei on 16/5/24.
  */
 public abstract class BluetoothController<T extends BluetoothSecretary> extends BluetoothConnector {
-    /**
-     * 连接断开
-     */
-    public static final String CONNECT_INTERRUPT_ACTION = BluetoothLibrary.getPackageName() + ".BluetoothConnector.Connect.Interrupt";
 
     /**
      * 初始化状态
@@ -47,19 +41,14 @@ public abstract class BluetoothController<T extends BluetoothSecretary> extends 
     protected String connectMac;
 
     /**
-     * The M call back.
-     */
-    protected ConnectCallBack mCallBack;
-
-    /**
      * 秘书的引用
      */
     protected T mSecretary;
 
     /**
-     * 是否自动重连
+     * 广播发射器
      */
-    protected boolean reconnect;
+    protected IBroadcaster mBroadcaster;
 
     /**
      * Gets connect mac.
@@ -89,40 +78,6 @@ public abstract class BluetoothController<T extends BluetoothSecretary> extends 
     }
 
     /**
-     * Gets call back.
-     *
-     * @return the call back
-     */
-    public ConnectCallBack getCallBack() {
-        return mCallBack;
-    }
-
-    /**
-     * Sets call back.
-     *
-     * @param mCallBack the m call back
-     */
-    public void setCallBack(ConnectCallBack mCallBack) {
-        this.mCallBack = mCallBack;
-    }
-
-    /**
-     * 设置是否重连
-     * @param reconnect
-     */
-    public void setReconnect(boolean reconnect) {
-        this.reconnect = reconnect;
-    }
-
-    /**
-     * 是否重连
-     * @return
-     */
-    public boolean isReconnect() {
-        return reconnect;
-    }
-
-    /**
      * 设置秘书
      *
      * @param t the t
@@ -142,6 +97,26 @@ public abstract class BluetoothController<T extends BluetoothSecretary> extends 
     {
         return this.mSecretary;
     }
+
+    /**
+     * 设置广播器
+     *
+     * @param broadcaster the broadcaster
+     */
+    public void setBroadcaster(IBroadcaster broadcaster) {
+        this.mBroadcaster = broadcaster;
+    }
+
+    /**
+     * Gets broadcaster.
+     * 获取广播器
+     *
+     * @return the broadcaster
+     */
+    public IBroadcaster getBroadcaster() {
+        return mBroadcaster;
+    }
+
     /**
      * =====================
      * start --- 超时处理

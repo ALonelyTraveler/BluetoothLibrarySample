@@ -24,14 +24,14 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     /**
      * RxJava响应式编程
      * 参考：https://www.gitbook.com/book/mcxiaoke/rxdocs/details
      * **/
     compile 'io.reactivex:rxjava:1.1.5'
     compile 'io.reactivex:rxandroid:1.2.0'
+    compile 'org.greenrobot:eventbus:3.0.0'
 }
 //添加
 publish {
