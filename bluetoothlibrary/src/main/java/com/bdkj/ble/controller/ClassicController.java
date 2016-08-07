@@ -2,12 +2,12 @@ package com.bdkj.ble.controller;
 
 import android.bluetooth.BluetoothDevice;
 import com.bdkj.ble.connector.ClassicConnector;
-import com.bdkj.ble.spp.ClassicSecretary;
+import com.bdkj.ble.event.EventConstants;
+import com.bdkj.ble.secretary.ClassicSecretary;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 import java.io.IOException;
@@ -17,15 +17,23 @@ import java.util.concurrent.TimeUnit;
  * 传统蓝牙控制器
  * Created by chenwei on 16/5/24.
  */
-public class ClassicController<T extends ClassicSecretary> extends BluetoothController<ClassicSecretary> {
+public class ClassicController<T extends ClassicSecretary> extends BluetoothController<ClassicSecretary> implements ClassicSecretary.InterruptedCallback {
 
+    /**
+     * 连接器
+     */
     private ClassicConnector mConnector;
 
+    /**
+     * 当前连接的RxJava处理
+     */
     private Subscription subscription;
 
-    private Subscription timeoutSubscription;
-
+    /**
+     * 当前连接的设备
+     */
     private BluetoothDevice mDevice;
+
 
     public ClassicController(T secretary) {
         mConnector = new ClassicConnector();
@@ -37,19 +45,34 @@ public class ClassicController<T extends ClassicSecretary> extends BluetoothCont
         if (device == null) {
             return;
         }
+        isCancel = false;
         mDevice = device;
+        counter = 0;
+        firstConnect = true;
+        suspend = false;
         connectState = STATE_CONNECTING;
         connectMac = device.getAddress();
+        connect();
+    }
+
+    /**
+     * 连接
+     */
+    private void connect() {
         Observable<Boolean> observable = Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(Subscriber<? super Boolean> subscriber) {
                 try {
                     if (!subscriber.isUnsubscribed()) {
+                        Thread.sleep(300);
                         mConnector.connect(mDevice.getAddress());
                         subscriber.onNext(true);
                         subscriber.onCompleted();
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
+                    subscriber.onError(e);
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                     subscriber.onError(e);
                 }
@@ -65,43 +88,50 @@ public class ClassicController<T extends ClassicSecretary> extends BluetoothCont
 
                     @Override
                     public void onError(Throwable e) {
-                        cancelTimeout();
                         if (mConnector != null && mConnector.isCancel()) {
                             return;
                         }
                         e.printStackTrace();
-                        connectState = STATE_INIT;
+                        appearDisconnect();
                     }
 
                     @Override
                     public void onNext(Boolean aBoolean) {
-                        cancelTimeout();
+                        counter = 0;
+                        //如果是初次连接,则通知连接成功和状态改变
+                        if (firstConnect) {
+                            firstConnect = false;
+                            sendConnectAction(EventConstants.SUCCESS);
+                            sendStatus(EventConstants.STATE_CONNECTED);
+                        }
+                        //如果是中途断开,则通知状态改变
+                        if (suspend) {
+                            suspend = false;
+                            sendStatus(EventConstants.STATE_CONNECTED);
+                        }
                         connectState = STATE_CONNECTED;
                         if (mSecretary != null) {
-                            mSecretary.dismiss();
+                            mSecretary.employ(mConnector);
+                            mSecretary.setCallback(ClassicController.this);
                         }
-                        else{
-                            mSecretary = new ClassicSecretary();
-                        }
-                        mSecretary.employ(mConnector);
                     }
                 });
-        timeoutSubscription = Observable.timer(timeout, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.newThread())
-                .subscribe(new Action1<Long>() {
-                    @Override
-                    public void call(Long aLong) {
-                        cancelConnect();
-                    }
-                });
-
     }
 
     @Override
     public void disconnect() {
+        if (connectState == STATE_INIT || connectState == STATE_DISCONNECTING || isCancel) {
+            return;
+        }
+        isCancel = true;
         cancelSubscription();
-        cancelTimeout();
         connectState = STATE_DISCONNECTING;
+        try {
+            mConnector.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        sendStatus(EventConstants.STATE_DISCONNECTED);
         if (mSecretary != null) {
             mSecretary.dismiss();
         }
@@ -110,10 +140,17 @@ public class ClassicController<T extends ClassicSecretary> extends BluetoothCont
 
     @Override
     public void cancelConnect() {
+        if (connectState == STATE_INIT || connectState == STATE_DISCONNECTING || isCancel) {
+            return;
+        }
+        isCancel = true;
         cancelSubscription();
-        cancelTimeout();
         connectState = STATE_DISCONNECTING;
         mConnector.cancelConnect();
+        sendStatus(EventConstants.STATE_DISCONNECTED);
+        if (mSecretary != null) {
+            mSecretary.dismiss();
+        }
         connectState = STATE_INIT;
     }
 
@@ -127,15 +164,42 @@ public class ClassicController<T extends ClassicSecretary> extends BluetoothCont
         }
     }
 
+
     /**
-     * 取消超时事件
+     * 出现断开或错误的时候
      */
-    @Override
-    public void cancelTimeout() {
-        if (timeoutSubscription != null) {
-            timeoutSubscription.unsubscribe();
-            timeoutSubscription = null;
+    private void appearDisconnect() {
+        //如果是初次连接,则不记录停止的状态
+        if (!firstConnect) {
+            suspend = true;
+        }
+        if ((!isRetry()) || counter >= maxReconnectCount) {
+            connectState = STATE_INIT;
+            if (firstConnect) {
+                sendConnectAction(EventConstants.FAIL);
+            } else {
+                sendStatus(EventConstants.STATE_DISCONNECTED);
+                if (mSecretary != null) {
+                    mSecretary.dismiss();
+                }
+            }
+            isCancel = true;
+            connectState = STATE_DISCONNECTING;
+            mConnector.cancelConnect();
+            connectState = STATE_INIT;
+        } else {
+            counter++;
+            connectState = STATE_CONNECTING;
+            if (isCancel) {
+                return;
+            }
+            connect();
         }
     }
 
+
+    @Override
+    public void interrupted(Throwable throwable) {
+        appearDisconnect();
+    }
 }

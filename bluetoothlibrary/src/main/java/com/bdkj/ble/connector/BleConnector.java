@@ -35,7 +35,6 @@ public class BleConnector extends BluetoothConnector {
         }
         mBluetoothGatt = device.connectGatt(mContext.getApplicationContext(), false, mGattCallback);
     }
-
     @Override
     public void disconnect() {
         if (mBluetoothGatt != null) {

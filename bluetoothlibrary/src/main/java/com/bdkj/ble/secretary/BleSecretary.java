@@ -1,4 +1,4 @@
-package com.bdkj.ble.spp;
+package com.bdkj.ble.secretary;
 
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothGatt;
@@ -14,11 +14,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * @ClassName: BleSecretary
- * @Description: 低功耗蓝牙秘书
+ * 低功耗蓝牙秘书
  * @author: chenwei
  * @version: V1.0
- * @Date: 16/8/3 下午4:21
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public abstract class BleSecretary implements BluetoothSecretary {

@@ -1,13 +1,16 @@
 package com.bdkj.ble.controller;
 
+import android.bluetooth.BluetoothGattService;
 import com.bdkj.ble.connector.BluetoothConnector;
-import com.bdkj.ble.spp.BluetoothSecretary;
+import com.bdkj.ble.secretary.BluetoothSecretary;
+
+import java.util.List;
 
 /**
  * 蓝牙控制器
  * Created by chenwei on 16/5/24.
  */
-public abstract class BluetoothController<T extends BluetoothSecretary> extends BluetoothConnector {
+public abstract class BluetoothController<T extends BluetoothSecretary> extends BluetoothConnector  implements IBroadcaster{
 
     /**
      * 初始化状态
@@ -49,6 +52,31 @@ public abstract class BluetoothController<T extends BluetoothSecretary> extends 
      * 广播发射器
      */
     protected IBroadcaster mBroadcaster;
+
+    /**
+     * 是否重试
+     */
+    protected boolean retry = true;
+
+    /**
+     * 最大重试次数
+     */
+    protected int maxReconnectCount = 3;
+
+    /**
+     * 当前重试次数
+     */
+    protected int counter = 0;
+
+    /**
+     * 是否初次连接
+     */
+    protected boolean firstConnect = false;
+
+    /**
+     * 是否是中途断开
+     */
+    protected boolean suspend = false;
 
     /**
      * Gets connect mac.
@@ -118,48 +146,52 @@ public abstract class BluetoothController<T extends BluetoothSecretary> extends 
     }
 
     /**
-     * =====================
-     * start --- 超时处理
-     * =====================
-     */
-    /**
-     * 默认超时时间
-     */
-    public static final long DEFAULT_TIMEOUT = 12000;
-
-    /**
-     * 搜索的超时时间
-     */
-    protected long timeout = DEFAULT_TIMEOUT;
-
-    /**
-     * Sets timeout.
+     * Sets retry.
      *
-     * @param timeout the timeout
+     * @param retry    the retry
+     * @param maxCount the max count
      */
-    public void setTimeout(long timeout) {
-        this.timeout = timeout;
+    public void setRetry(boolean retry,int maxCount) {
+        this.retry = retry;
+        this.maxReconnectCount = maxCount >= 1 ? maxCount : 1;
     }
 
     /**
-     * Gets timeout.
+     * Is retry boolean.
      *
-     * @return the timeout
+     * @return the boolean
      */
-    public long getTimeout() {
-        return timeout;
+    public boolean isRetry() {
+        return retry;
     }
 
     /**
-     * Cancel timeout.
+     * ===================================
+     * <p>
+     * IBroadcaster的实现,方便在该类中进行调用
+     * <p>
+     * ===================================
      */
-    public abstract void cancelTimeout();
+    @Override
+    public void sendConnectAction(String action) {
+        if (mBroadcaster != null) {
+            mBroadcaster.sendConnectAction(action);
+        }
+    }
 
-    /**
-     * =====================
-     * end --- 超时处理
-     * =====================
-     */
+    @Override
+    public void sendStatus(String status) {
+        if (mBroadcaster != null) {
+            mBroadcaster.sendStatus(status);
+        }
+    }
+
+    @Override
+    public void sendService(List<BluetoothGattService> services) {
+        if (mBroadcaster != null) {
+            mBroadcaster.sendService(services);
+        }
+    }
 
 
 }

@@ -23,7 +23,7 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-def libraryVersion = "0.1.2"
+def libraryVersion = "0.2.0"
 
 ext {
 //-------- bintray config -----------

@@ -8,44 +8,29 @@ import android.util.Log;
 import com.bdkj.ble.BluetoothLibrary;
 import com.bdkj.ble.connector.BleConnector;
 import com.bdkj.ble.event.EventConstants;
-import com.bdkj.ble.spp.BleSecretary;
+import com.bdkj.ble.secretary.BleSecretary;
 import com.bdkj.ble.util.BluetoothUtils;
 import com.bdkj.ble.util.CHexConver;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * BLE蓝牙控制器
  * Created by chenwei on 16/5/24.
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-public class BleController<T extends BleSecretary> extends BluetoothController<BleSecretary> implements IBroadcaster {
+public class BleController<T extends BleSecretary> extends BluetoothController<BleSecretary> {
 
     /**
      * BLE设备连接器
      */
     private BleConnector mConnector;
-
-    /**
-     * 最大重试次数
-     */
-    private int maxReconnectCount = 3;
-
-    /**
-     * 当前重试次数
-     */
-    private int counter = 0;
-
-    /**
-     * 是否初次连接
-     */
-    private boolean firstConnect = false;
-
-    /**
-     * 是否是中途断开
-     */
-    private boolean suspend = false;
 
     private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
@@ -137,7 +122,7 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
-            if (BluetoothLibrary.isDebug()&&status == BluetoothGatt.GATT_SUCCESS) {
+            if (BluetoothLibrary.isDebug() && status == BluetoothGatt.GATT_SUCCESS) {
                 byte[] data = characteristic.getValue();
                 Log.d("BleController", "onCharacteristicWrite:" + CHexConver.byte2HexStr(data, data.length));
             }
@@ -149,7 +134,7 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicRead(gatt, characteristic, status);
-            if (BluetoothLibrary.isDebug()&&status == BluetoothGatt.GATT_SUCCESS) {
+            if (BluetoothLibrary.isDebug() && status == BluetoothGatt.GATT_SUCCESS) {
                 byte[] data = characteristic.getValue();
                 Log.d("BleController", "onCharacteristicRead:" + CHexConver.byte2HexStr(data, data.length));
             }
@@ -167,7 +152,7 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
         if (!firstConnect) {
             suspend = true;
         }
-        if (counter >= maxReconnectCount) {
+        if ((!isRetry()) || counter >= maxReconnectCount) {
             connectState = STATE_INIT;
             if (firstConnect) {
                 sendConnectAction(EventConstants.FAIL);
@@ -184,31 +169,33 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
         } else {
             counter++;
             connectState = STATE_CONNECTING;
-            try {
-                Thread.sleep(600);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             if (isCancel) {
                 return;
             }
-            try {
-                reconnect(mConnector.getBluetoothGatt());
-            } catch (IOException e) {
-                e.printStackTrace();
-                if (firstConnect) {
-                    sendConnectAction(EventConstants.FAIL);
-                } else {
-                    sendStatus(EventConstants.STATE_DISCONNECTED);
-                    if (mSecretary != null) {
-                        mSecretary.dismiss();
-                    }
-                }
-                isCancel = true;
-                connectState = STATE_DISCONNECTING;
-                mConnector.cancelConnect();
-                connectState = STATE_INIT;
-            }
+            Observable.timer(600, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.newThread())
+                    .subscribe(new Action1<Long>() {
+                        @Override
+                        public void call(Long aLong) {
+                            try {
+                                reconnect(mConnector.getBluetoothGatt());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                if (firstConnect) {
+                                    sendConnectAction(EventConstants.FAIL);
+                                } else {
+                                    sendStatus(EventConstants.STATE_DISCONNECTED);
+                                    if (mSecretary != null) {
+                                        mSecretary.dismiss();
+                                    }
+                                }
+                                isCancel = true;
+                                connectState = STATE_DISCONNECTING;
+                                mConnector.cancelConnect();
+                                connectState = STATE_INIT;
+                            }
+                        }
+                    });
         }
     }
 
@@ -242,7 +229,7 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
 
     @Override
     public void disconnect() {
-        if (connectState == STATE_INIT || connectState == STATE_DISCONNECTING) {
+        if (connectState == STATE_INIT || connectState == STATE_DISCONNECTING || isCancel) {
             return;
         }
         isCancel = true;
@@ -257,7 +244,7 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
 
     @Override
     public void cancelConnect() {
-        if (connectState == STATE_INIT || connectState == STATE_DISCONNECTING) {
+        if (connectState == STATE_INIT || connectState == STATE_DISCONNECTING || isCancel) {
             return;
         }
         isCancel = true;
@@ -268,10 +255,6 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
             mSecretary.dismiss();
         }
         connectState = STATE_INIT;
-    }
-
-    @Override
-    public void cancelTimeout() {
     }
 
     /**
@@ -303,32 +286,5 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
         }
     }
 
-    /**
-     * ===================================
-     * <p>
-     * IBroadcaster的实现,方便在该类中进行调用
-     * <p>
-     * ===================================
-     */
-    @Override
-    public void sendConnectAction(String action) {
-        if (mBroadcaster != null) {
-            mBroadcaster.sendConnectAction(action);
-        }
-    }
-
-    @Override
-    public void sendStatus(String status) {
-        if (mBroadcaster != null) {
-            mBroadcaster.sendStatus(status);
-        }
-    }
-
-    @Override
-    public void sendService(List<BluetoothGattService> services) {
-        if (mBroadcaster != null) {
-            mBroadcaster.sendService(services);
-        }
-    }
 
 }

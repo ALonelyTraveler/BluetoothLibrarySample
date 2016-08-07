@@ -26,7 +26,8 @@ public abstract class BluetoothConnector {
     /**
      * 连接蓝牙设备
      *
-     * @param address
+     * @param address the address
+     * @throws IOException the io exception
      */
     public void connect(String address) throws IOException {
         connect(BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address));

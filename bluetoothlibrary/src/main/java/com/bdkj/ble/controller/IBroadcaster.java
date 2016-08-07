@@ -5,11 +5,9 @@ import android.bluetooth.BluetoothGattService;
 import java.util.List;
 
 /**
- * @ClassName: IBroadcaster
- * @Description: 传递消息的方式
+ * 传递消息的方式
  * @author: chenwei
  * @version: V1.0
- * @Date: 16/8/5 上午9:57
  */
 public interface IBroadcaster {
 
@@ -21,7 +19,7 @@ public interface IBroadcaster {
      * {@link com.bdkj.ble.event.EventConstants#TIMEOUT}
      * </pre>
      *
-     * @param action
+     * @param action 动作
      */
     public void sendConnectAction(String action);
 
@@ -32,7 +30,7 @@ public interface IBroadcaster {
      *     {@link com.bdkj.ble.event.EventConstants#STATE_DISCONNECTED}
      * </pre>
      *
-     * @param status
+     * @param status 状态
      */
     public void sendStatus(String status);
 
@@ -42,7 +40,7 @@ public interface IBroadcaster {
      *     {@link com.bdkj.ble.event.EventConstants#DISCOVERY_SERVICE}
      * </pre>
      *
-     * @param services
+     * @param services 蓝牙服务列表
      */
     public void sendService(List<BluetoothGattService> services);
 

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,8 +20,7 @@ import com.bdkj.ble.event.ServiceAction;
 import com.bdkj.ble.scanner.BLEScanner;
 import com.bdkj.ble.scanner.BaseScanner;
 import com.bdkj.ble.scanner.ScanCallBack;
-import com.bdkj.ble.spp.BleSecretary;
-import com.bdkj.ble.util.BluetoothUtils;
+import com.bdkj.ble.secretary.BleSecretary;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+public class BLEActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
     SwipeRefreshLayout mSwipeLayout = null;
     private String serviceUUID = "14839AC4-7D7E-415C-9A42-167340CF2339";
     private String characteristicUUID = "8B00ACE7-EB0B-49B0-BBE9-9AEE0A26E1A3";
@@ -53,16 +53,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             mController.cancelConnect();
         }
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
         BluetoothLibrary.initPackage(getPackageName()).setDebug(true);
         initRefresh();
 
         EventBus.getDefault().register(this);
         lvDevice = (ListView) findViewById(R.id.lvDevices);
-        lvDevice.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,names));
+        lvDevice.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, names));
         lvDevice.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -70,14 +73,14 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 mSwipeLayout.setRefreshing(false);
                 mSwipeLayout.setEnabled(false);
                 if (mController == null) {
-                    mController = new BleController<BleSecretary>(MainActivity.this.getApplicationContext(), new BleSecretary(){
+                    mController = new BleController<BleSecretary>(BLEActivity.this.getApplicationContext(), new BleSecretary() {
 
                         @Override
                         public void onCharacteristicRead(BluetoothGattCharacteristic characteristic, int status) {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(MainActivity.this, "读到数据-------", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(BLEActivity.this, "读到数据-------", Toast.LENGTH_SHORT).show();
                                 }
                             });
 
@@ -103,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 }
             }
         });
-        scanner = new BLEScanner(this,8000);
+        scanner = new BLEScanner(8000);
 //        scanner.setBluetoothFilter(new NameMatcher("WL75"));
         scanner.setCallBack(new ScanCallBack() {
             @Override
@@ -126,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     names.add(name);
                     addressAll.add(address);
 
-                    ((ArrayAdapter)lvDevice.getAdapter()).notifyDataSetChanged();
+                    ((ArrayAdapter) lvDevice.getAdapter()).notifyDataSetChanged();
                 }
             }
         });
@@ -138,8 +141,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 if (mController != null) {
                     if (mController.isConnect()) {
                         mController.disconnect();
-                    }
-                    else{
+                    } else {
                         mController.cancelConnect();
                     }
                 }
@@ -150,12 +152,23 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         findViewById(R.id.btnReadBattery).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mController != null&&mController.isConnect()) {
-                    mController.getBluetoothSecretary().writeCharcteristic(serviceUUID, characteristicUUID, new byte[]{(byte) 0xFE, (byte) 0xEF,0x03,0x00,0x75,0x76});
+                if (mController != null && mController.isConnect()) {
+                    Toast.makeText(BLEActivity.this, "是否成功:" + mController.getBluetoothSecretary().readCharacteristic(battery_service, battery_character), Toast.LENGTH_SHORT).show();
 
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+        }
+//        return super.onOptionsItemSelected(item);
+        return true;
     }
 
     private void initRefresh() {
@@ -166,42 +179,32 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mSwipeLayout.setSize(SwipeRefreshLayout.DEFAULT);
 //        mSwipeLayout.setProgressViewEndTarget(true, 100);
         mSwipeLayout.setEnabled(true);
-        if (BluetoothUtils.isEnableBT()) {
-            new android.os.Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeLayout.setRefreshing(true);
-                    onRefresh();
-                }
-            }, 1000);
-        }
-        else{
-            boolean enable = BluetoothUtils.autoEnableBluetooth();
-            if (!enable) {
-                Toast.makeText(this, "蓝牙无法启动", Toast.LENGTH_SHORT).show();
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeLayout.setRefreshing(true);
+                onRefresh();
             }
-            else{
-                Toast.makeText(this, "蓝牙正在启动", Toast.LENGTH_SHORT).show();
-            }
-        }
+        }, 1000);
     }
+
 
     @Override
     public void onRefresh() {
         list.clear();
         names.clear();
-        ((ArrayAdapter)lvDevice.getAdapter()).notifyDataSetChanged();
+        ((ArrayAdapter) lvDevice.getAdapter()).notifyDataSetChanged();
         scanner.startScan();
     }
 
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onConnectAction(ConnectAction action) {
-        if (action.equals(EventConstants.SUCCESS)) {
+        if (action.action.equals(EventConstants.SUCCESS)) {
             Toast.makeText(this, "连接成功", Toast.LENGTH_SHORT).show();
 
 
-        } else if (action.equals(EventConstants.FAIL)) {
+        } else if (action.action.equals(EventConstants.FAIL)) {
             Toast.makeText(this, "连接失败", Toast.LENGTH_SHORT).show();
         }
     }

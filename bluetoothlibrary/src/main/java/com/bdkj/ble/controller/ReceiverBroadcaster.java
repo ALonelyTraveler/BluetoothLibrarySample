@@ -8,11 +8,9 @@ import com.bdkj.ble.BluetoothLibrary;
 import java.util.List;
 
 /**
- * @ClassName: EventBusBroadcaster
- * @Description: 使用EventBus进行广播
+ * 使用EventBus进行广播
  * @author: chenwei
  * @version: V1.0
- * @Date: 16/8/5 下午4:01
  */
 public class ReceiverBroadcaster implements IBroadcaster {
     /**

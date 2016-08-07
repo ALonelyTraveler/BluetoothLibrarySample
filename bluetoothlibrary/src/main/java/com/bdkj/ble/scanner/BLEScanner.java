@@ -3,7 +3,6 @@ package com.bdkj.ble.scanner;
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import com.bdkj.ble.scanner.filter.BluetoothFilter;
@@ -22,11 +21,10 @@ import java.util.UUID;
 
 /**
  *  BLE蓝牙搜索器,前提是手机支持低功耗
- *  支持的API >= 18 (4.3)
+ *  支持的API大于等于18 (4.3)
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class BLEScanner extends BaseScanner {
-    private Context context;
     /**
      * 手机的蓝牙适配器
      */
@@ -47,22 +45,18 @@ public class BLEScanner extends BaseScanner {
     /**
      * Instantiates a new Ble scanner.
      *
-     * @param context the context
      * @param timeout the timeout
      */
-    public BLEScanner(Context context, long timeout) {
+    public BLEScanner(long timeout) {
         super(timeout);
-        this.context = context;
     }
 
     /**
      * Instantiates a new Ble scanner.
      *
-     * @param context the context
      */
-    public BLEScanner(Context context) {
+    public BLEScanner() {
         super(DEFAULT_TIMEOUT);
-        this.context = context;
     }
 
     @Override

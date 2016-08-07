@@ -3,11 +3,9 @@ package com.bdkj.ble.event;
 import com.bdkj.ble.BluetoothLibrary;
 
 /**
- * @ClassName: EventConstants
- * @Description: 事件常量
+ *  事件常量
  * @author: chenwei
  * @version: V1.0
- * @Date: 16/8/4 下午5:01
  */
 public class EventConstants {
     /**=======================================

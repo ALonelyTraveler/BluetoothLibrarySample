@@ -82,4 +82,12 @@ public class ClassicConnector extends BluetoothConnector {
     public OutputStream getOutputStream() {
         return outputStream;
     }
+
+    public BluetoothSocket getSocket() {
+        return socket;
+    }
+
+    public boolean canWrite() {
+        return outputStream != null && socket != null && socket.isConnected();
+    }
 }

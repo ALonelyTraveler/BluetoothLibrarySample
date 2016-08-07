@@ -10,8 +10,10 @@ import android.bluetooth.BluetoothDevice;
 public interface BluetoothFilter {
     /**
      * 过滤设备是否正确
-     * @param device
-     * @return
+     * @param device 蓝牙设备
+     * @param localName 蓝牙名称
+     * @param rssi 信号强度
+     * @return 是否匹配
      */
     public boolean filter(BluetoothDevice device,String localName,int rssi);
 }
