@@ -2,6 +2,7 @@ package com.bandou.bluetooth.sample;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
@@ -44,11 +45,16 @@ public class BLEActivity extends AppCompatActivity implements SwipeRefreshLayout
     BaseScanner scanner = null;
 
     BleController<BleSecretary> mController;
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        mHandler.removeCallbacksAndMessages(null);
+        if (scanner != null) {
+            scanner.stopScan();
+        }
         if (mController != null) {
             mController.cancelConnect();
         }
@@ -179,7 +185,7 @@ public class BLEActivity extends AppCompatActivity implements SwipeRefreshLayout
         mSwipeLayout.setSize(SwipeRefreshLayout.DEFAULT);
 //        mSwipeLayout.setProgressViewEndTarget(true, 100);
         mSwipeLayout.setEnabled(true);
-        new android.os.Handler().postDelayed(new Runnable() {
+        mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 mSwipeLayout.setRefreshing(true);
