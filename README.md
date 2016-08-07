@@ -9,9 +9,9 @@
 	
 ## 项目依赖
 
-  compile 'io.reactivex:rxjava:1.1.5'
+  	compile 'io.reactivex:rxjava:1.1.5'
   
-  compile 'io.reactivex:rxandroid:1.2.0'
+  	compile 'io.reactivex:rxandroid:1.2.0'
   
-  compile 'org.greenrobot:eventbus:3.0.0'
+  	compile 'org.greenrobot:eventbus:3.0.0'
 
