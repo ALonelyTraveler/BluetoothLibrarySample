@@ -56,7 +56,7 @@ public abstract class BluetoothController<T extends BluetoothSecretary> extends 
     /**
      * 是否重试
      */
-    protected boolean retry = true;
+    protected boolean retry = false;
 
     /**
      * 最大重试次数

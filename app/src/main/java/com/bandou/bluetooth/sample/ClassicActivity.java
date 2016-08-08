@@ -51,6 +51,7 @@ public class ClassicActivity extends AppCompatActivity implements SwipeRefreshLa
         if (mController != null) {
             mController.cancelConnect();
         }
+
     }
 
     @Override
@@ -155,6 +156,7 @@ public class ClassicActivity extends AppCompatActivity implements SwipeRefreshLa
     public void onRefresh() {
         list.clear();
         names.clear();
+        addressAll.clear();
         ((ArrayAdapter) lvDevice.getAdapter()).notifyDataSetChanged();
         scanner.startScan();
     }

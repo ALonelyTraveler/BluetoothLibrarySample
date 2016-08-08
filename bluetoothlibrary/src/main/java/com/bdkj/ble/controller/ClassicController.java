@@ -1,6 +1,7 @@
 package com.bdkj.ble.controller;
 
 import android.bluetooth.BluetoothDevice;
+import android.util.Log;
 import com.bdkj.ble.connector.ClassicConnector;
 import com.bdkj.ble.event.EventConstants;
 import com.bdkj.ble.secretary.ClassicSecretary;
@@ -66,6 +67,11 @@ public class ClassicController<T extends ClassicSecretary> extends BluetoothCont
                     if (!subscriber.isUnsubscribed()) {
                         Thread.sleep(300);
                         mConnector.connect(mDevice.getAddress());
+                        if (mConnector != null && isCancel) {
+                            Log.d("ClassicController", "IOException取消连接");
+                            mConnector.cancelConnect();
+                            return;
+                        }
                         subscriber.onNext(true);
                         subscriber.onCompleted();
                     }
@@ -125,15 +131,19 @@ public class ClassicController<T extends ClassicSecretary> extends BluetoothCont
         }
         isCancel = true;
         cancelSubscription();
+        //只有当设备已连接或正在重连的状态才通知用户已断开连接
+        boolean isNotifyDisconnected = (connectState == STATE_CONNECTED) || ((!firstConnect) && suspend && connectState == STATE_CONNECTING);
         connectState = STATE_DISCONNECTING;
         try {
             mConnector.disconnect();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        sendStatus(EventConstants.STATE_DISCONNECTED);
-        if (mSecretary != null) {
-            mSecretary.dismiss();
+        if (isNotifyDisconnected) {
+            sendStatus(EventConstants.STATE_DISCONNECTED);
+            if (mSecretary != null) {
+                mSecretary.dismiss();
+            }
         }
         connectState = STATE_INIT;
     }
@@ -145,11 +155,15 @@ public class ClassicController<T extends ClassicSecretary> extends BluetoothCont
         }
         isCancel = true;
         cancelSubscription();
+        //只有当设备已连接或正在重连的状态才通知用户已断开连接
+        boolean isNotifyDisconnected = (connectState == STATE_CONNECTED) || ((!firstConnect) && suspend && connectState == STATE_CONNECTING);
         connectState = STATE_DISCONNECTING;
         mConnector.cancelConnect();
-        sendStatus(EventConstants.STATE_DISCONNECTED);
-        if (mSecretary != null) {
-            mSecretary.dismiss();
+        if (isNotifyDisconnected) {
+            sendStatus(EventConstants.STATE_DISCONNECTED);
+            if (mSecretary != null) {
+                mSecretary.dismiss();
+            }
         }
         connectState = STATE_INIT;
     }

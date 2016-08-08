@@ -199,6 +199,7 @@ public class BLEActivity extends AppCompatActivity implements SwipeRefreshLayout
     public void onRefresh() {
         list.clear();
         names.clear();
+        addressAll.clear();
         ((ArrayAdapter) lvDevice.getAdapter()).notifyDataSetChanged();
         scanner.startScan();
     }

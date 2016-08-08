@@ -65,7 +65,6 @@ public class ClassicConnector extends BluetoothConnector {
 
     @Override
     public void cancelConnect() {
-        isCancel = true;
         while (socket != null && socket.isConnected()) {
             try {
                 disconnect();
@@ -73,6 +72,7 @@ public class ClassicConnector extends BluetoothConnector {
                 e.printStackTrace();
             }
         }
+        isCancel = true;
     }
 
     public InputStream getInputStream() {

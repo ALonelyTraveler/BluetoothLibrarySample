@@ -233,11 +233,15 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
             return;
         }
         isCancel = true;
+        //只有当设备已连接或正在重连的状态才通知用户已断开连接
+        boolean isNotifyDisconnected = (connectState == STATE_CONNECTED) || ((!firstConnect) && suspend && connectState == STATE_CONNECTING);
         connectState = STATE_DISCONNECTING;
         mConnector.disconnect();
-        sendStatus(EventConstants.STATE_DISCONNECTED);
-        if (mSecretary != null) {
-            mSecretary.dismiss();
+        if (isNotifyDisconnected) {
+            sendStatus(EventConstants.STATE_DISCONNECTED);
+            if (mSecretary != null) {
+                mSecretary.dismiss();
+            }
         }
         connectState = STATE_INIT;
     }
@@ -248,11 +252,15 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
             return;
         }
         isCancel = true;
+        //只有当设备已连接或正在重连的状态才通知用户已断开连接
+        boolean isNotifyDisconnected = (connectState == STATE_CONNECTED) || ((!firstConnect) && suspend && connectState == STATE_CONNECTING);
         connectState = STATE_DISCONNECTING;
         mConnector.cancelConnect();
-        sendStatus(EventConstants.STATE_DISCONNECTED);
-        if (mSecretary != null) {
-            mSecretary.dismiss();
+        if (isNotifyDisconnected) {
+            sendStatus(EventConstants.STATE_DISCONNECTED);
+            if (mSecretary != null) {
+                mSecretary.dismiss();
+            }
         }
         connectState = STATE_INIT;
     }
