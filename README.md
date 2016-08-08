@@ -1,7 +1,7 @@
 # BluetoothLibrarySample
 蓝牙搜索、连接、数据收发等工具库
 ##当前版本(VERSION)
-[![Maven Central](https://img.shields.io/badge/VERSION-0.2.0-orange.svg)](https://bintray.com/gcssloop/maven/sutil/view)
+[![Maven Central](https://img.shields.io/badge/VERSION-0.2.1-orange.svg)](https://bintray.com/gcssloop/maven/sutil/view)
 
 ## gradle依赖
 
