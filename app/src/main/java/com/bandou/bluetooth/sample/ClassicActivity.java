@@ -89,6 +89,7 @@ public class ClassicActivity extends AppCompatActivity implements SwipeRefreshLa
                 }
             }
         });
+        
         scanner = new ClassicScanner(this, 8000);
 //        scanner.setBluetoothFilter(new NameMatcher("WL75"));
         scanner.setCallBack(new ScanCallBack() {

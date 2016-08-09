@@ -102,14 +102,16 @@ public class BLEActivity extends AppCompatActivity implements SwipeRefreshLayout
 
                         }
                     });
-                    mController.setBroadcaster(new EventBusBroadcaster());
+
                 }
+                mController.setBroadcaster(new EventBusBroadcaster());
                 DeviceInfo info = list.get(i);
                 try {
                     mController.connect(info.address);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
             }
         });
         scanner = new BLEScanner(8000);
