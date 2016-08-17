@@ -153,4 +153,15 @@ public class BluetoothUtils {
 
         return false;
     }
+
+    /**
+     * Gets local address.
+     * 获取本地蓝牙地址(不需要权限)
+     *
+     * @param context the context
+     * @return the local address
+     */
+    public static String getLocalAddress(Context context) {
+        return android.provider.Settings.Secure.getString(context.getContentResolver(), "bluetooth_address");
+    }
 }

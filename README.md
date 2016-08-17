@@ -1,7 +1,7 @@
 # BluetoothLibrarySample
 蓝牙搜索、连接、数据收发等工具库
 ##当前版本(VERSION)
-[![Maven Central](https://img.shields.io/badge/VERSION-0.2.1-orange.svg)](https://bintray.com/gcssloop/maven/sutil/view)
+[![Maven Central](https://img.shields.io/badge/VERSION-0.2.2-orange.svg)](https://bintray.com/gcssloop/maven/sutil/view)
 
 ## gradle依赖
 
@@ -145,6 +145,12 @@
 
 ## 更新日志
 
+>
+>0.2.2 (2016-8-17)
+>
+>* BluetoothUtils添加获取本地蓝牙地址的方法
+>
+>--------------------------
 >
 >0.2.1 (2016-8-9)
 >
