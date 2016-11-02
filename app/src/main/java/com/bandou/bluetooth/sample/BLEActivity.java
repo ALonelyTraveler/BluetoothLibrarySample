@@ -5,12 +5,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import com.bandou.bluetooth.sample.model.DeviceInfo;
 import com.bdkj.ble.BluetoothLibrary;
 import com.bdkj.ble.controller.BleController;
@@ -18,10 +20,12 @@ import com.bdkj.ble.controller.EventBusBroadcaster;
 import com.bdkj.ble.event.ConnectAction;
 import com.bdkj.ble.event.EventConstants;
 import com.bdkj.ble.event.ServiceAction;
+import com.bdkj.ble.event.StatusAction;
 import com.bdkj.ble.scanner.BLEScanner;
 import com.bdkj.ble.scanner.BaseScanner;
 import com.bdkj.ble.scanner.ScanCallBack;
 import com.bdkj.ble.secretary.BleSecretary;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -130,11 +134,11 @@ public class BLEActivity extends AppCompatActivity implements SwipeRefreshLayout
             public void foundSpeificDevice(String name, String address, int rssi) {
                 if (!addressAll.contains(address)) {
                     DeviceInfo info = new DeviceInfo();
-                    info.name = name;
+                    info.name = TextUtils.isEmpty(name)?"Unknown":name;
                     info.address = address;
                     info.rssi = rssi;
                     list.add(info);
-                    names.add(name);
+                    names.add(info.name);
                     addressAll.add(address);
 
                     ((ArrayAdapter) lvDevice.getAdapter()).notifyDataSetChanged();
@@ -223,6 +227,13 @@ public class BLEActivity extends AppCompatActivity implements SwipeRefreshLayout
         Toast.makeText(this, "接收到服务", Toast.LENGTH_SHORT).show();
         mController.getBluetoothSecretary().setCharacteristicNotification(serviceUUID, notifyUUID, true);
     }
-
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onStatusAction(StatusAction action) {
+        if (action.action.equals(EventConstants.STATE_CONNECTED)) {
+            Toast.makeText(this, "已连接", Toast.LENGTH_SHORT).show();
+        } else if (action.action.equals(EventConstants.STATE_DISCONNECTED)) {
+            Toast.makeText(this, "已断开连接", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 }

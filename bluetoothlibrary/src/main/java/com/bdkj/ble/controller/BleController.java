@@ -1,24 +1,31 @@
 package com.bdkj.ble.controller;
 
 import android.annotation.TargetApi;
-import android.bluetooth.*;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
+
 import com.bdkj.ble.BluetoothLibrary;
 import com.bdkj.ble.connector.BleConnector;
 import com.bdkj.ble.event.EventConstants;
 import com.bdkj.ble.secretary.BleSecretary;
 import com.bdkj.ble.util.BluetoothUtils;
 import com.bdkj.ble.util.CHexConver;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * BLE蓝牙控制器
@@ -37,6 +44,11 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
             if (isCancel) {
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 mConnector.cancelConnect();
                 return;
             }
@@ -64,7 +76,9 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    gatt.discoverServices();
+                    if (!isCancel) {
+                        gatt.discoverServices();
+                    }
                 } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                     appearDisconnect();
                 }
@@ -78,7 +92,9 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
             Log.d("BleController", "-------0-----");
-
+            if (isCancel) {
+                return;
+            }
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 List<BluetoothGattService> services = gatt.getServices();
                 if (BluetoothLibrary.isDebug()) {
@@ -104,6 +120,9 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
                     }
                 }
                 sendService(services);
+            }
+            else{
+                Log.d("BleController", "未发现任务服务");
             }
         }
 
@@ -293,6 +312,5 @@ public class BleController<T extends BleSecretary> extends BluetoothController<B
             mConnector.connect(connectMac);
         }
     }
-
 
 }

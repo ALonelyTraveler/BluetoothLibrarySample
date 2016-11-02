@@ -5,19 +5,21 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.Build;
 import android.os.Handler;
+
 import com.bdkj.ble.scanner.filter.BluetoothFilter;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  *  BLE蓝牙搜索器,前提是手机支持低功耗
@@ -101,6 +103,9 @@ public class BLEScanner extends BaseScanner {
                     @Override
                     public void call(Subscriber<? super ParsedAd> subscriber) {
                         ParsedAd result = parseData(scanRecord);
+                        if (result.localName == null) {
+                            result.localName = "";
+                        }
                         subscriber.onNext(result);
                         subscriber.onCompleted();
                     }
